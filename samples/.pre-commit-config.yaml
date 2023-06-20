@@ -34,7 +34,7 @@ repos:
             docs|
             site"""
 
-        language_version: __python_version_str__
+        language_version: __python_version__
 
   # flake8
   - repo: https://github.com/PyCQA/flake8

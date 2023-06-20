@@ -179,7 +179,7 @@ declare -A replacements=(
     [_project_name_]=$project_name
     [_author_]=$author
     [_current_year_]=$current_year
-    [_python_version_str_]="python${python_version}"
+    [_python_version_]="python${python_version}"
 )
 
 # replace all and write new file
