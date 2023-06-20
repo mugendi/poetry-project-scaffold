@@ -3,6 +3,12 @@
 # BASED ON
 # 1. https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2
 
+# trap for errors we throw
+trap 'echo >&2 "$_  Line: $LINENO"; exit $LINENO;' ERR
+# to throw any error, simply write it to stderr
+# printf '%s\n' "My Error" >&2  # write error message to stderr
+# exit
+
 unameOut=$(uname -a)
 case "${unameOut}" in
 *Microsoft*) OS="WSL" ;;  #must be first since Windows subsystem for linux will have Linux in the name too
@@ -141,9 +147,28 @@ function replace-all() {
     echo "$txt"
 }
 
-txt=$(cat samples/mkdocs.yml)
+# fetches a file from the github repo using wget
+function fetch-file() {
+    # make raw content path
+    content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}"
 
-author="Anthony Mugendi"
+    # attempt to get file
+    txt=$(wget -qO- $content_url)
+
+
+    # if nothing then throw
+    if [ "x$txt" == "x" ]; then
+        printf '%s\n' "Could not fecth file '${1}'. Ensure it is committed & pushed." >&2  # write error message to stderr
+        exit 1 
+    fi
+
+
+    echo "$txt"
+}
+
+txt=$(fetch-file "samples/mkdocs.yml")
+
+author="Anthony Mugz"
 project_name="test_project"
 declare -A company=(
     [_project_name_]=$project_name
@@ -152,7 +177,7 @@ declare -A company=(
 )
 
 # replace all and write new file
-replace-all "$txt" company > tests/mkdocs.yml
+replace-all "$txt" company >tests/mkdocs.yml
 
 exit
 
