@@ -167,21 +167,27 @@ function fetch-file() {
 }
 
 
-# fetch file into txt var
-txt=$(fetch-file "samples/mkdocs.yml")
+
 
 # some vars
 author="Anthony Mugz"
 project_name="test_project"
 # replacement dict
-declare -A company=(
+declare -A replacements=(
     [_project_name_]=$project_name
     [_author_]=$author
     [_current_year_]=$current_year
 )
 
 # replace all and write new file
-replace-all "$txt" company >tests/mkdocs.yml
+txt=$(fetch-file "samples/mkdocs.yml")
+replace-all "$txt" replacements >tests/mkdocs.yml
+
+txt=$(fetch-file "samples/extra.css")
+replace-all "$txt" replacements >tests/extra.css
+
+txt=$(fetch-file "samples/.flake8")
+replace-all "$txt" replacements >tests/.flake8
 
 exit
 
