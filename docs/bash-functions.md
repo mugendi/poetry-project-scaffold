@@ -112,6 +112,9 @@ function ensure-var() {
     echo "${var}"  
 }
 
+```
+
+```bash
 test_var=""
 test_var=$(ensure-var "$test_var" "default value" "test_var")
 echo $test_var
