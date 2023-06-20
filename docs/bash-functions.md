@@ -47,20 +47,23 @@ function replace-all() {
     echo "$txt"
 }
 
-# fetches a file from the github repo using wget
+
+# fetches a file from the github repo using curl
 function fetch-file() {
+    timestamp=$(date +"%s.%3N")
     # make raw content path
-    content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}"
+    # add timestamp to force fresh fetches
+    # https://raw.githubusercontent.com/mugendi/poetry-project-scaffold/master
+    content_url="https://raw.githubusercontent.com/mugendi/poetry-project-scaffold/master/${1}?t={timestamp}"
 
     # attempt to get file
-    txt=$(wget --no-cache -qO- $content_url)
+    txt=$(curl -s -H 'Cache-Control: no-cache'  -H 'Pragma: no-cache' "$content_url")
 
     # if nothing then throw
     if [ "x$txt" == "x" ]; then
         printf '%s\n' "Could not fecth file '${1}'. Ensure it is committed & pushed." >&2  # write error message to stderr
         exit 1 
     fi
-
 
     echo "$txt"
 }

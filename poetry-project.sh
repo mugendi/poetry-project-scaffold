@@ -148,15 +148,16 @@ function replace-all() {
 }
 
 
-# fetches a file from the github repo using wget
+# fetches a file from the github repo using curl
 function fetch-file() {
     timestamp=$(date +"%s.%3N")
     # make raw content path
     # add timestamp to force fresh fetches
-    content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}?t={timestamp}"
+    # https://raw.githubusercontent.com/mugendi/poetry-project-scaffold/master
+    content_url="https://raw.githubusercontent.com/mugendi/poetry-project-scaffold/master/${1}?t={timestamp}"
 
     # attempt to get file
-    txt=$(wget --no-check-certificate --no-cache --no-cookies -qO- $content_url)
+    txt=$(curl -s -H 'Cache-Control: no-cache'  -H 'Pragma: no-cache' "$content_url")
 
     # if nothing then throw
     if [ "x$txt" == "x" ]; then
@@ -196,6 +197,10 @@ replace-all "$txt" replacements >tests/.flake8
 
 txt=$(fetch-file "samples/.pre-commit-config.yaml")
 replace-all "$txt" replacements >tests/.pre-commit-config.yaml
+
+txt=$(fetch-file "samples/README.md")
+replace-all "$txt" replacements >tests/README.md
+
 exit
 
 section "Defining Project" "Set your project name"
