@@ -129,7 +129,7 @@ function replace-text() {
 # replace multiple occurences of text
 # takes txt replacemrnt dict
 # Where replacement dict looks somewhat like:
-#   declare -A company=(
+#   declare -A project=(
 #       [_project_name_]="awesome_project"
 #       [_author_]="Nguru Mugendi"
 #       [_current_year_]=2013
@@ -174,7 +174,6 @@ function ensure-var() {
     local var="$1"
     local default="$2"
     local var_name="$3"
-
 
     if [ "x$var" == "x" ]; then
 

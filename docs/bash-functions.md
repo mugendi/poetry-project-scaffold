@@ -29,7 +29,7 @@ function replace-text() {
 # replace multiple occurences of text
 # takes txt replacemrnt dict
 # Where replacement dict looks somewhat like:
-#   declare -A company=(
+#   declare -A project=(
 #       [_project_name_]="awesome_project"
 #       [_author_]="Nguru Mugendi"
 #       [_current_year_]=2013
@@ -78,14 +78,14 @@ txt=$(fetch-file "samples/mkdocs.yml")
 author="Anthony Mugz"
 project_name="test_project"
 # replacement dict
-declare -A company=(
+declare -A project=(
     [_project_name_]=$project_name
     [_author_]=$author
     [_current_year_]=$current_year
 )
 
 # replace all and write new file
-replace-all "$txt" company >tests/mkdocs.yml
+replace-all "$txt" project >tests/mkdocs.yml
 ```
 
 # Ensure Variable has value
@@ -98,7 +98,6 @@ function ensure-var() {
     local var="$1"
     local default="$2"
     local var_name="$3"
-
 
     if [ "x$var" == "x" ]; then
 
