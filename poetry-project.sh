@@ -192,6 +192,8 @@ replace-all "$txt" replacements >tests/extra.css
 txt=$(fetch-file "samples/.flake8")
 replace-all "$txt" replacements >tests/.flake8
 
+txt=$(fetch-file "samples/.pre-commit-config.yaml")
+replace-all "$txt" replacements >tests/.pre-commit-config.yaml
 exit
 
 section "Defining Project" "Set your project name"
