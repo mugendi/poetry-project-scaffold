@@ -1,7 +1,6 @@
 # Copyright (c) __current_year__ __author__
 
-
-# isort
+# isort config
 repos:
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
@@ -13,7 +12,7 @@ repos:
     hooks:
       - id: isort
 
-  # black
+  # black config
   - repo: https://github.com/ambv/black
     rev: 23.3.0
     hooks:
@@ -39,7 +38,7 @@ repos:
 
         language_version: __python_version_str__
 
-  # flake8
+  # flake8 config
   - repo: https://github.com/PyCQA/flake8
     rev: 6.0.0
     hooks:

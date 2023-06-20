@@ -158,7 +158,6 @@ function fetch-file() {
     # attempt to get file
     txt=$(wget --no-check-certificate --no-cache --no-cookies -qO- $content_url)
 
-
     # if nothing then throw
     if [ "x$txt" == "x" ]; then
         printf '%s\n' "Could not fecth file '${1}'. Ensure it is committed & pushed." >&2  # write error message to stderr
