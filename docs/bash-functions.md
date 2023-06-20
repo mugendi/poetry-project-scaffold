@@ -53,7 +53,7 @@ function fetch-file() {
     content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}"
 
     # attempt to get file
-    txt=$(wget -qO- $content_url)
+    txt=$(wget --no-cache -qO- $content_url)
 
     # if nothing then throw
     if [ "x$txt" == "x" ]; then
