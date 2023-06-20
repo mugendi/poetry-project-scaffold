@@ -1,0 +1,9 @@
+{
+    "ignore": ["./env"],    
+    "env": {
+        "ENV": "development"
+    },
+    "ext": "sh,yml,fake8,css",
+    "watch":["./samples","./poetry-project.sh"],
+    "exec": "rm -rf poetry_project && mkdir -p tests &&  bash poetry-project.sh poetry_project"
+}

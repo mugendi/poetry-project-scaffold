@@ -1,0 +1,158 @@
+# Copyright © __current_year__ __author__
+# 
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
+
+site_name: __project_name__
+copyright: Copyright © __current_year__ __author__.
+
+# site_url: https://mugendi.github.io/wraptimer/
+# repo_url: https://github.com/mugendi/wraptimer
+
+edit_uri: blob/main/docs/
+docs_dir: docs
+
+# navigation bar
+nav: 
+  - index.md
+
+
+# Watch
+watch:
+  - mkdocs.yml
+  - __project_name__
+  - docs
+  - README.md
+
+
+# Theme
+# https://squidfunk.github.io/mkdocs-material/reference/
+theme:
+    name: ansible
+    highlightjs: true
+    
+    # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
+    palette:
+      # can be either "default, red, pink, purple, deep purple, indigo, blue, light blue, cyan, teal, green, light green, lime, yellow, amber, orange, deep orange, brown, grey, blue grey, black, white"
+      - primary: indigo
+
+    features:
+      - content.code.copy
+      - content.action.edit
+      - navigation.expand
+      - navigation.sections
+      - navigation.instant
+      - navigation.indexes
+      - navigation.tracking
+      - toc.integrate
+      - content.tooltips
+    icon:
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+
+# Plugins
+plugins:
+  - autorefs
+  - material/search
+  - material/social
+  - material/tags
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+          options:
+            # heading_level: 2
+            docstring_style: sphinx
+            docstring_options:
+              ignore_init_summary: yes
+
+            show_submodules: yes
+            docstring_section_style: list
+            members_order: alphabetical
+            show_category_heading: no
+            # cannot merge init into class due to parse error...
+            # merge_init_into_class: yes
+            show_root_heading: yes
+            show_signature_annotations: yes
+            separate_signature: yes
+            show_bases: false
+ 
+# markdown extensions
+# https://facelessuser.github.io/pymdown-extensions/#extensions
+markdown_extensions:
+  - markdown_include.include:
+      base_path: docs
+  
+  - def_list
+  - footnotes
+
+  - pymdownx.emoji
+
+  - pymdownx.highlight:
+      anchor_linenums: true
+      linenums : true
+      auto_title: false
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      social_url_shorthand: true
+      social_url_shortener: true
+      user: facelessuser
+      repo: pymdown-extensions
+      normalize_issue_symbols: true
+
+  - pymdownx.tabbed:
+      alternate_style: true
+  
+  - toc:
+      toc_depth: 4
+      permalink: true
+
+  - pymdownx.superfences
+
+  # https://facelessuser.github.io/pymdown-extensions/extensions/tasklist/
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+  # Used to highlight added, deleted or updated sections in a document
+  # https://facelessuser.github.io/pymdown-extensions/extensions/critic/
+  - pymdownx.critic
+
+  # https://facelessuser.github.io/pymdown-extensions/extensions/betterem/
+  - pymdownx.betterem
+
+  # https://facelessuser.github.io/pymdown-extensions/extensions/keys/
+  # ++ctrl+alt+delete++
+  - pymdownx.keys
+
+  # abbreviations and snippets
+  # https://squidfunk.github.io/mkdocs-material/reference/tooltips/#mkdocsyml
+  - abbr
+  - attr_list
+  - pymdownx.snippets:
+      auto_append:
+        - docs/includes/abbreviations.md
+
+  # Admonitions
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/?h=admonition#octicons
+  - admonition
+
+
+extra_css:
+  - styles/extra.css
