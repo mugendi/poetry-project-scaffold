@@ -1,7 +1,4 @@
 # Copyright © __current_year__ __author__
-# 
-# This software is released under the MIT License.
-# https://opensource.org/licenses/MIT
 
 site_name: __project_name__
 copyright: Copyright © __current_year__ __author__.

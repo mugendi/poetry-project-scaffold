@@ -166,10 +166,14 @@ function fetch-file() {
     echo "$txt"
 }
 
+
+# fetch file into txt var
 txt=$(fetch-file "samples/mkdocs.yml")
 
+# some vars
 author="Anthony Mugz"
 project_name="test_project"
+# replacement dict
 declare -A company=(
     [_project_name_]=$project_name
     [_author_]=$author

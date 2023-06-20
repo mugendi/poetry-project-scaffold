@@ -1,0 +1,9 @@
+/**
+ * Copyright (c) __current_year__ __author__
+ */
+
+ h1 {
+    font-weight: bold !important;
+    color: var(--md-primary-fg-color) !important;
+}
+

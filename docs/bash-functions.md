@@ -6,7 +6,7 @@
 -->
 
 
-# Fetching a file && Replacing all contents
+# Fetching a file and Replacing all contents
 
 ```bash
 
