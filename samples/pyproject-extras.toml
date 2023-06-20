@@ -18,3 +18,8 @@ exclude = '''
 )/
 '''
 line-length = 90
+
+
+[tool.pytest.ini_options]
+addopts = "-n auto"
+testpaths = ["tests"]
