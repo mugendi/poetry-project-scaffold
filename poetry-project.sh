@@ -156,7 +156,7 @@ function fetch-file() {
     content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}?t={timestamp}"
 
     # attempt to get file
-    txt=$(wget -qO- $content_url)
+    txt=$(wget --no-check-certificate --no-cache --no-cookies -qO- $content_url)
 
 
     # if nothing then throw
