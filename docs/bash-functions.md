@@ -87,3 +87,34 @@ declare -A company=(
 # replace all and write new file
 replace-all "$txt" company >tests/mkdocs.yml
 ```
+
+# Ensure Variable has value
+
+```bash
+# check if an existing variable contains a value
+# if not, return default value 
+# if no default, throw an error
+function ensure-var() {    
+    local var="$1"
+    local default="$2"
+    local var_name="$3"
+
+
+    if [ "x$var" == "x" ]; then
+
+        if [ "x$default" == "x" ]; then
+            printf '%s\n' "Variable '${var_name}' cannot be empty! Exiting... Try again." >&2 # write error message to stderr
+            exit 1
+        else
+            echo "${default}"        
+        fi
+    fi
+
+    echo "${var}"  
+}
+
+test_var=""
+test_var=$(ensure-var "$test_var" "default value" "test_var")
+echo $test_var
+# => default value
+```

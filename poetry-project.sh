@@ -147,7 +147,6 @@ function replace-all() {
     echo "$txt"
 }
 
-
 # fetches a file from the github repo using curl
 function fetch-file() {
     timestamp=$(date +"%s.%3N")
@@ -157,20 +156,45 @@ function fetch-file() {
     content_url="https://raw.githubusercontent.com/mugendi/poetry-project-scaffold/master/${1}?t={timestamp}"
 
     # attempt to get file
-    txt=$(curl -s -H 'Cache-Control: no-cache'  -H 'Pragma: no-cache' "$content_url")
+    txt=$(curl -s -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$content_url")
 
     # if nothing then throw
     if [ "x$txt" == "x" ]; then
-        printf '%s\n' "Could not fecth file '${1}'. Ensure it is committed & pushed." >&2  # write error message to stderr
-        exit 1 
+        printf '%s\n' "Could not fecth file '${1}'. Ensure it is committed & pushed." >&2 # write error message to stderr
+        exit 1
     fi
-
 
     echo "$txt"
 }
 
+# check if an existing variable contains a value
+# if not, return default value 
+# if no default, throw an error
+function ensure-var() {    
+    local var="$1"
+    local default="$2"
+    local var_name="$3"
 
 
+    if [ "x$var" == "x" ]; then
+
+        if [ "x$default" == "x" ]; then
+            printf '%s\n' "Variable '${var_name}' cannot be empty! Exiting... Try again." >&2 # write error message to stderr
+            exit 1
+        else
+            echo "${default}"        
+        fi
+    fi
+
+    echo "${var}"  
+}
+
+test_var=""
+
+test_var=$(ensure-var "$test_var" "default value" "test_var")
+
+echo $test_var
+exit
 
 # some vars
 author="Anthony Mugz"
