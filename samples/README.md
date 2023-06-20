@@ -5,7 +5,7 @@
 
 # __project_name__
 
-Project Summary goes here...
+Project Summary goes here 😊
 
 ## How To Use
 Use `__project_name__` as shown below:
