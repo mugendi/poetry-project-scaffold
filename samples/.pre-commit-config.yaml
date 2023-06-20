@@ -1,5 +1,6 @@
 # Copyright (c) __current_year__ __author__
 
+
 # isort
 repos:
   - repo: https://github.com/asottile/seed-isort-config

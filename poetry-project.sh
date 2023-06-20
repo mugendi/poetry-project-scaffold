@@ -147,13 +147,16 @@ function replace-all() {
     echo "$txt"
 }
 
+
 # fetches a file from the github repo using wget
 function fetch-file() {
+    timestamp=$(date +"%s.%3N")
     # make raw content path
-    content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}"
+    # add timestamp to force fresh fetches
+    content_url="https://github.com/mugendi/poetry-project-scaffold/raw/master/${1}?t={timestamp}"
 
     # attempt to get file
-    txt=$(wget --no-cache -qO- $content_url)
+    txt=$(wget -qO- $content_url)
 
 
     # if nothing then throw
