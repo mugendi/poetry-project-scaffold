@@ -1,6 +1,8 @@
 */
-*.cast
+
 nodemon.json
 !samples/
 !docs/
 !assets/
+
+assets/*.cast
