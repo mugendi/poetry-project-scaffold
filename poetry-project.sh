@@ -553,7 +553,7 @@ work_in_project_dir() {
 
     echo
     log ">> Running pre-commit autoupdate ~ " "poetry run pre-commit autoupdate"
-    # poetry run pre-commit autoupdate
+    poetry run pre-commit autoupdate
 
     echo
     log ">> Running pre-commit run --all-files ~ " "poetry run pre-commit run --all-files"
