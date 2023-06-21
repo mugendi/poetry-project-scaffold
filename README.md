@@ -5,4 +5,10 @@
  https://opensource.org/licenses/MIT
 -->
 
-<script async id="asciicast-JPZMEwQtKu5SyPz6yAuS36gqQ" src="https://asciinema.org/a/JPZMEwQtKu5SyPz6yAuS36gqQ.js"></script>
+
+<!-- 
+To generate new recording, run
+rm -rf poetry_project && svg-term --out assets/recording.svg --window --command "bash poetry-project.sh -y"
+ -->
+
+![](assets/recording.svg)
