@@ -66,8 +66,8 @@ Simply run the **poetry-project** script: `bash poetry-project`
 
 To help you visualize what kind of poetry project is generated, we created a dummy project repo and deployed the documentation (`mkdocs gh-deploy`) without changing anything.
 
-- [View the project](https://github.com/mugendi/dummy-poetry-project)
-- [View documentation](https://mugendi.github.io/dummy-poetry-project/)
+- [View dummy project](https://github.com/mugendi/dummy-poetry-project)
+- [View dummy documentation](https://mugendi.github.io/dummy-poetry-project/)
 
 ## PS 
 
