@@ -263,7 +263,7 @@ $(c di)           $2$(c 0)
     line "$(c Cd)-$(c 0)"
 }
 
-function emoji(){
+function emoji() {
 
     local emoji=""
 
@@ -271,18 +271,19 @@ function emoji(){
         # set emoji
         case $1 in
 
-        note|n) emoji="🛑" ;;
-        up|u) emoji="👆" ;;
-        down|d) emoji="👇" ;;
-        left|l) emoji="👈" ;;
-        right|r) emoji="👉" ;;
+        note | n) emoji="🛑" ;;
+        up | u) emoji="👆" ;;
+        down | d) emoji="👇" ;;
+        left | l) emoji="👈" ;;
+        right | r) emoji="👉" ;;
         hi) emoji="🖐️" ;;
-        horns|h) emoji="🤘" ;;
-        fist|f) emoji="✊" ;;
-        thumbs_up|tu) emoji="👍" ;;
-        thumbs_down|td) emoji="👎" ;;        
-        tick|t) emoji="✔" ;;
+        horns | h) emoji="🤘" ;;
+        fist | f) emoji="✊" ;;
+        thumbs_up | tu) emoji="👍" ;;
+        thumbs_down | td) emoji="👎" ;;
+        tick | t) emoji="✔" ;;
         cross) emoji="✗" ;;
+        palette | p) emoji="🎨" ;;
         *) emoji="" ;;
 
         esac
@@ -295,14 +296,11 @@ function note() {
 
     local text=$(ensure_var "$1" "NO TEXT ENTERED!!!")
     local emoji=$(ensure_var "$2" "note")
-    emoji=$(emoji "$emoji")    
+    emoji=$(emoji "$emoji")
 
     log "$(c sY)$emoji NOTE:$(c 0) $(c iY)$text$(c 0)"
 
 }
-
-
-
 
 # ************************************************************************************
 
@@ -382,7 +380,6 @@ project_version=$(ensure_var "$project_version" "$default_version" "Project Name
 log "Awesome! Project details below will be used: \n" "\tAuthor: $(c Ws)$author$(c 0G), Project: $(c Ws)$project_name$(c 0G), Version: $(c Ws)$project_version$(c 0)\n"
 
 is_that_ok
-
 
 # ************************************************************************************
 
@@ -481,7 +478,6 @@ work_in_project_dir() {
     echo
     log ">> Activating local environment ~ " "source env/bin/activate"
     source env/bin/activate
-
 
     # ************************************************************************************
 
@@ -627,13 +623,12 @@ work_in_project_dir() {
     echo
     log "" "Finished setting up $poetry_project! Go through the logs $(emoji "up") to check for any warnings or errors."
 
-    echo 
+    echo
     note "Remember to update $(c Bs)'./poetry_project/pyproject.toml$(c 0Yi) and:$(c Wi)
-         - Add $(c  s)'keywords'$(c 0Wi)
-         - Add $(c  s)'classifiers'$(c 0Wi) see: $(c Bu)https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc$(c 0Wi) 
-         - Select correct $(c  s)'license'$(c 0Wi)
-         - Edit $(c  s)'homepage'$(c 0Wi) and $(c  s)'repository'$(c 0Wi) values
-         $(c 0)"
+         - Add $(c s)'keywords'$(c 0Wi)
+         - Add $(c s)'classifiers'$(c 0Wi) see: $(c Bu)https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc$(c 0Wi) 
+         - Select correct $(c s)'license'$(c 0Wi)
+         - Edit $(c s)'homepage'$(c 0Wi) and $(c s)'repository'$(c 0Wi) values$(c 0)"
 
     echo
     note "For documentation, you can now:
@@ -641,6 +636,13 @@ work_in_project_dir() {
          $(c Wi)- Serve docs with >> $(c Bs)mkdocs serve$(c 0)
          $(c Wi)- Deploy docs with >> $(c Bs)mkdocs gh-deploy$(c 0)" "tick"
 
+    echo
+    note "To style the project docs:
+        - Have a look at mkdocs.yml for theme configs
+        - The docs use $(c Ws)'Ansible'$(c 0Yi) theme by default
+                see $(c Bu)https://squidfunk.github.io/mkdocs-material/reference/$(c 0Yi)         
+         - You can also edit $(c Ws)'docs/styles/extra.css'$(c 0Yi) for additional css
+         " "palette"
     echo
 
 }
