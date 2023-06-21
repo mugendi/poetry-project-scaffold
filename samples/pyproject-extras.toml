@@ -23,12 +23,3 @@ line-length = 90
 [tool.isort]
 profile = "black"
 
-# optional groups
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.doc]
-optional = true
