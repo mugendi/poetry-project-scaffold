@@ -62,6 +62,8 @@ Simply run the **poetry-project** script: `bash poetry-project`
 
 ## Dummy Project
 
+![Dummy Project Docs](assets/sample-docs-landing.png)
+
 To help you visualize what kind of poetry project is generated, we created a dummy project repo and deployed the documentation (`mkdocs gh-deploy`) without changing anything.
 
 - [View the project](https://github.com/mugendi/dummy-poetry-project)
