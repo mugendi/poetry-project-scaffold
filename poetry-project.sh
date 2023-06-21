@@ -642,18 +642,15 @@ work_in_project_dir() {
         - Have a look at mkdocs.yml for theme configs
         - The docs use $(c Ws)'Ansible'$(c 0Yi) theme by default
                 see $(c Bu)https://squidfunk.github.io/mkdocs-material/reference/$(c 0Yi)         
-         - You can also edit $(c Ws)'docs/styles/extra.css'$(c 0Yi) for additional css
-         " "palette"
-    echo
-
+         - You can also edit $(c Ws)'docs/styles/extra.css'$(c 0Yi) for additional css" "palette"
+    
     echo
     note "Check out these references:
          - pyproject.toml configs: $(c Bu)https://github.com/python-poetry/poetry/blob/master/pyproject.toml$(c 0Yi)
          - Pypi classifiers: $(c Bu)https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc$(c 0Yi)
          - mkdocs: $(c Bu)https://mkdocs-dupe-test.readthedocs.io/$(c 0Yi)
          - Docs theme: $(c Bu)https://squidfunk.github.io/mkdocs-material/reference/$(c 0Yi) 
-         - Also checkout documentations for $(c Ws)flake8, isort & black$(c 0)
-         " "book"
+         - Also checkout documentations for $(c Ws)flake8, isort & black$(c 0)" "book"
     echo
 
 }
