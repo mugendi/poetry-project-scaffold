@@ -57,8 +57,14 @@ For non-linux systems, you can attempt the following installation procedure.
 Simply run the **poetry-project** script: `bash poetry-project` 
 
 
+## Sample Docs 
+Below is the samples docs landing page generated
 
-# PS 
+![](assets/sample-docs-landing.png)
+
+
+
+## PS 
 
 I have documented some of the functions used in this bash script [HERE](./docs/bash-functions.md) mostly because most took a lot of googling to put together and because I would love to re-use most in other projects with ease.
 
