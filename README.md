@@ -7,8 +7,8 @@
 
 
 <!-- 
-To generate new recording, run
-rm -rf poetry_project && svg-term --out assets/recording.svg --window --command "bash poetry-project.sh -y"
+To generate new recording, run 
+bash record-svg.sh
  -->
 
 ![](assets/recording.gif)
