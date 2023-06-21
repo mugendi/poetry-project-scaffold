@@ -9,38 +9,34 @@ trap 'echo >&2 "$_  Line: $LINENO"; exit $LINENO;' ERR
 # printf '%s\n' "My Error" >&2  # write error message to stderr
 # exit
 
-unameOut=$(uname -a)
-case "${unameOut}" in
-*Microsoft*) OS="WSL" ;;  #must be first since Windows subsystem for linux will have Linux in the name too
-*microsoft*) OS="WSL2" ;; #WARNING: My v2 uses ubuntu 20.4 at the moment slightly different name may not always work
-Linux*) OS="Linux" ;;
-Darwin*) OS="Mac" ;;
-CYGWIN*) OS="Cygwin" ;;
-MINGW*) OS="Windows" ;;
-*Msys) OS="Windows" ;;
-*) OS="UNKNOWN:${unameOut}" ;;
-esac
-
-# Color Values
-RED="\e[31m"
-GREEN="\e[32m"
-BOLDGREEN="\e[1;${GREEN}m"
-ITALICRED="\e[3;${RED}m"
-WHITE="\e[97m"
-ENDCOLOR="\e[0m"
-DIM="\e[2m"
+# some defaults
 
 # Terminal Size
 lines=$(tput lines)
 columns=$(tput cols)
-current_year=$(date +%Y)
-
 format_line_length=90
 
-function log() {
-    # echo
-    echo -e "$1${GREEN}${2}${ENDCOLOR}${RED}$3${ENDCOLOR}"
-}
+# ************************************************************************************
+# parse & check our command args
+new_project=true
+src_layout=false
+default_inputs=false
+
+while getopts 'isy' opt; do
+    case $opt in
+    # similar to poetry
+    i) new_project=false ;;
+    # use src layout
+    s) src_layout=true ;;
+    # answer yes to inputs and thus use defaults
+    y) default_inputs=true ;;
+    *)
+        echo 'Error in command line parsing. Expects -i/-y/-s' >&2
+        exit 1
+        ;;
+
+    esac
+done
 
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
@@ -75,19 +71,8 @@ function line() {
     echo
 }
 
-function section() {
-    echo
-    echo
-    line "${WHITE}░${ENDCOLOR}"
-    log_multi "    
-SECTION : ${GREEN}$1${ENDCOLOR}
-${DIM}$2${ENDCOLOR}
-"
-    line "${DIM}-${ENDCOLOR}"
-}
-
 # Replace the line of the given line number with the given replacement in the given file.
-function replace-line-in-file() {
+function replace_line_in_file() {
     local file="$1"
     local line_num="$2"
     local replacement="$3"
@@ -99,7 +84,7 @@ function replace-line-in-file() {
     sed -i "${line_num}s/.*/$replacement_escaped\n/" "$file"
 }
 
-function replace-above-section() {
+function replace_above_section() {
 
     local file="$1"
     local section="$2"
@@ -110,14 +95,14 @@ function replace-above-section() {
     dependencies_line="$(($dependencies_line - 1))"
 
     if ((dependencies_line > 0)); then
-        replace-line-in-file $file $dependencies_line $replacement
+        replace_line_in_file $file $dependencies_line $replacement
     fi
 
 }
 
 # replace text str with another
 # takes txt match replacement
-function replace-text() {
+function replace_text() {
     local txt="$1"
     local match="$2"
     local replacement="$3"
@@ -134,13 +119,13 @@ function replace-text() {
 #       [_author_]="Nguru Mugendi"
 #       [_current_year_]=2013
 #   )
-function replace-all() {
+function replace_all() {
     local txt=$1
     local -n array=$2
 
     for i in "${!array[@]}"; do
         # echo "${i} => ${array[$i]}"
-        txt=$(replace-text "${txt}" "${i}" "${array[$i]}")
+        txt=$(replace_text "${txt}" "${i}" "${array[$i]}")
         # echo "$txt" | grep "${array[$i]}"
     done
 
@@ -148,7 +133,7 @@ function replace-all() {
 }
 
 # fetches a file from the github repo using curl
-function fetch-file() {
+function fetch_file() {
     timestamp=$(date +"%s.%3N")
     # make raw content path
     # add timestamp to force fresh fetches
@@ -168,9 +153,9 @@ function fetch-file() {
 }
 
 # check if an existing variable contains a value
-# if not, return default value 
+# if not, return default value
 # if no default, throw an error
-function ensure-var() {    
+function ensure_var() {
     local var="$1"
     local default="$2"
     local var_name="$3"
@@ -181,112 +166,172 @@ function ensure-var() {
             printf '%s\n' "Variable '${var_name}' cannot be empty! Exiting... Try again." >&2 # write error message to stderr
             exit 1
         else
-            echo "${default}"        
+            echo "${default}"
         fi
     fi
 
-    echo "${var}"  
+    echo "${var}"
 }
 
-test_var=""
+function ensure_which() {
+    local cmd="$1"
+    local test=$(which $cmd)
 
-test_var=$(ensure-var "$test_var" "default value" "test_var")
+    if [ "x$test" == "x" ]; then
+        printf '%s\n' "Command '${cmd}' does not exist. Please first install it." >&2 # write error message to stderr
+        exit 1
+    fi
 
-echo $test_var
-exit
+    echo $test
+}
 
-# some vars
-author="Anthony Mugz"
-project_name="test_project"
-python_version=3.9
+function snake_case() {
+    local str="$1"
+    echo "${str// /_}"
+}
 
-# replacement dict
-declare -A replacements=(
-    [_project_name_]=$project_name
-    [_author_]=$author
-    [_current_year_]=$current_year
-    [_python_version_str_]="python${python_version}"
-)
+function input_q() {
+    log "$(c s)$1$(c 0) $2 $3$4"
+}
 
-# replace all and write new file
-txt=$(fetch-file "samples/mkdocs.yml")
-replace-all "$txt" replacements >tests/mkdocs.yml
+function is_that_ok() {
+    input_q "Is that okay?" "(y/n)" "[y]"
 
-txt=$(fetch-file "samples/extra.css")
-replace-all "$txt" replacements >tests/extra.css
+    y_n=$(read_input "yes")
 
-txt=$(fetch-file "samples/.flake8")
-replace-all "$txt" replacements >tests/.flake8
+    y_n=$(echo $y_n | tr '[:upper:]' '[:lower:]')
+    y_n=${y_n:0:1}
 
-txt=$(fetch-file "samples/.pre-commit-config.yaml")
-replace-all "$txt" replacements >tests/.pre-commit-config.yaml
+    case $y_n in
+    n)
+        log "" "" "Okay. Exiting Now. Please try again."
+        exit
+        ;;
+    esac
+}
 
-txt=$(fetch-file "samples/README.md")
-replace-all "$txt" replacements >tests/README.md
+function read_input() {
+    if ! $default_inputs; then
+        read input_val
+        echo "$input_val"
+    fi
+}
 
-exit
+# Bash Colors
+#  https://github.com/ppo/bash-colors
+c() { [ $# == 0 ] && printf "\e[0m" || printf "$1" | sed 's/\(.\)/\1;/g;s/\([SDIUFNHT]\)/2\1/g;s/\([KRGYBMCW]\)/3\1/g;s/\([krgybmcw]\)/4\1/g;y/SDIUFNHTsdiufnhtKRGYBMCWkrgybmcw/12345789123457890123456701234567/;s/^\(.*\);$/\\e[\1m/g'; }
+cecho() { echo -e "$(c $1)${2}\e[0m"; }
 
-section "Defining Project" "Set your project name"
+#  ┌───────┬────────────────┬─────────────────┐   ┌───────┬─────────────────┬───────┐
+#  │ Fg/Bg │ Color          │ Octal           │   │ Code  │ Style           │ Octal │
+#  ├───────┼────────────────┼─────────────────┤   ├───────┼─────────────────┼───────┤
+#  │  K/k  │ Black          │ \e[ + 3/4  + 0m │   │  s/S  │ Bold (strong)   │ \e[1m │
+#  │  R/r  │ Red            │ \e[ + 3/4  + 1m │   │  d/D  │ Dim             │ \e[2m │
+#  │  G/g  │ Green          │ \e[ + 3/4  + 2m │   │  i/I  │ Italic          │ \e[3m │
+#  │  Y/y  │ Yellow         │ \e[ + 3/4  + 3m │   │  u/U  │ Underline       │ \e[4m │
+#  │  B/b  │ Blue           │ \e[ + 3/4  + 4m │   │  f/F  │ Blink (flash)   │ \e[5m │
+#  │  M/m  │ Magenta        │ \e[ + 3/4  + 5m │   │  n/N  │ Negative        │ \e[7m │
+#  │  C/c  │ Cyan           │ \e[ + 3/4  + 6m │   │  h/H  │ Hidden          │ \e[8m │
+#  │  W/w  │ White          │ \e[ + 3/4  + 7m │   │  t/T  │ Strikethrough   │ \e[9m │
+#  ├───────┴────────────────┴─────────────────┤   ├───────┼─────────────────┼───────┤
+#  │  High intensity        │ \e[ + 9/10 + *m │   │   0   │ Reset           │ \e[0m │
+#  └────────────────────────┴─────────────────┘   └───────┴─────────────────┴───────┘
 
+#  Usage
+#  printf "$(c sW)Bold white$(c) and normal"
+#  echo -e "Normal text… $(c sRy)BOLD red text on yellow background… $(c w)now on white background… $(c 0u) reset and underline… $(c) and back to normal."
+#  cecho Wb "White text on blue background"
+
+function log() {
+    # echo
+    echo -e " $1$(c G)$2$(c 0)$(c R)$3$(c 0)"
+}
+
+function section() {
+
+    echo
+    line "$(c C)-$(c 0)"
+    log_multi "    
+ SECTION : $(c s)$1$(c)
+$(c di)           $2$(c 0)
+"
+    line "$(c Cd)-$(c 0)"
+}
+
+function emoji(){
+
+    local emoji=""
+
+    if [ ! "x$1" == "x" ]; then
+        # set emoji
+        case $1 in
+
+        note|n) emoji="🛑" ;;
+        up|u) emoji="👆" ;;
+        down|d) emoji="👇" ;;
+        left|l) emoji="👈" ;;
+        right|r) emoji="👉" ;;
+        hi) emoji="🖐️" ;;
+        horns|h) emoji="🤘" ;;
+        fist|f) emoji="✊" ;;
+        thumbs_up|tu) emoji="👍" ;;
+        thumbs_down|td) emoji="👎" ;;        
+        tick|t) emoji="✔" ;;
+        cross) emoji="✗" ;;
+        *) emoji="" ;;
+
+        esac
+    fi
+
+    echo "$emoji"
+}
+
+function note() {
+
+    local text=$(ensure_var "$1" "NO TEXT ENTERED!!!")
+    local emoji=$(ensure_var "$2" "note")
+    emoji=$(emoji "$emoji")    
+
+    log "$(c sY)$emoji NOTE:$(c 0) $(c iY)$text$(c 0)"
+
+}
+
+
+
+
+# ************************************************************************************
+
+# ensuring requirements are met
+section "System Requirements" "Ensuring all needed requirements (git, python>3.9, poetry e.t.c) are met/installed."
+
+# ensure we can run important commands
+# head
+which_head=$(ensure_which "head")
+# grep
+which_grep=$(ensure_which "grep")
+# curl
+which_curl=$(ensure_which "curl")
+# wget
+which_wget=$(ensure_which "wget")
+# awk
+which_awk=$(ensure_which "awk")
+# git
+which_git=$(ensure_which "git")
+# python
+which_python=$(ensure_which "python3")
+# poetry
+which_poetry=$(ensure_which "poetry")
+
+# Some defaults & variables
+current_year=$(date +%Y)
+default_user=$(git config user.name)
+default_email=$(git config user.email)
+default_version="0.1.0"
+default_project_name="poetry_project"
 default_version="0.1.0"
 
-# default project
-if [ "x$1" == "x" ]; then
-    default_project="my_poetry_project"
-else
-    default_project=$1
-fi
-
-echo What is your name:
-read author
-
-if [ "x$author" == "x" ]; then
-    log "" "" 'You did not enter your name. Exiting. Please try again.'
-    exit
-fi
-
-# input project name
-echo Enter project name [$default_project]:
-read project_name
-
-if [ "x$project_name" == "x" ]; then
-    log "You did not enter a project name." " Using '${default_project}'"
-    project_name=$default_project
-fi
-
-echo Enter project version [$default_version]:
-read version
-
-if [ "x$version" == "x" ]; then
-    log ">> Using default version '${default_version}'"
-    version=$default_version
-fi
-
-# project name should have no spaces
-project_name=$(echo $project_name | tr -d ' ')
-
-# Show project summary and ask to continue
-log ">> Awesome we will set up the project: " "Author: $author, Project: $project_name, Version: $version"
-
-log ">> Is that okay? (y/n) [y] ?"
-read y_n
-y_n=$(echo $y_n | tr '[:upper:]' '[:lower:]')
-y_n=${y_n:0:1}
-
-case $y_n in
-n)
-    log "" "" "Okay. Exiting Now. Please try again."
-    exit
-    ;;
-esac
-
-section "Checking Requirements" "Ensures supported versions of Python and Poetry are installed. "
-
-# check python version
-log ">> Checking Python version ~ " "python -c 'import platform; print(platform.python_version())"
-
-# https://stackoverflow.com/a/67890569/1462634
-python_version=$(python -c 'import platform; print(platform.python_version())')
+# Get Python Version
+python_version=$($which_python --version | awk '{print $2}')
 python_version=${python_version:0:3}
 
 # Ensure we are on version 3.9 and upwards...
@@ -296,111 +341,144 @@ if [ $(version $python_version) -lt $(version "3.8.1") ]; then
     exit
 fi
 
-# ensure poetry is installed
-log ">> Ensuring poetry is installed ~ " "command -v poetry"
-if ! [ -x "$(command -v poetry)" ]; then
+log "All requirements have been satisfied ✔ " "
+   - $(grep --version | head -n 1)
+   - $(awk --version | head -n 1)
+   - $(head --version | head -n 1)
+   - $(wget --version | head -n 1)
+   - $(curl --version | head -n 1 | awk '{print $1 " " $2}')
+   - $(git --version)
+   - $($which_python --version)
+   - $(poetry --version)"
 
-    log '' '' 'poetry is not installed. Do you want to install with `pip install -U poetry` (y/n) [y] ?'
-    read i_poetry
-    i_poetry=$(echo $i_poetry | tr '[:upper:]' '[:lower:]')
-    i_poetry=${i_poetry:0:1}
+# ************************************************************************************
 
-    case $i_poetry in
-    y)
-        pip install -U poetry
-        ;;
-    *)
-        log "Okay, first install poetry then try again. Exiting Now..."
-        exit
-        ;;
-    esac
+section "Defining Project" "Set your project details"
+
+# Author Details
+input_q "Enter Your Name" "[$default_user]:"
+author=$(read_input)
+
+author=$(ensure_var "$author" "$default_user" "name")
+email=$(ensure_var "$default_email" "<email>" "email")
+
+# Project Details
+input_q "Project Name" "[$default_project_name]:"
+project_name=$(read_input)
+project_name=$(ensure_var "$project_name" "$default_project_name" "Project Name")
+# project name should have no spaces
+project_name=$(snake_case "$project_name")
+
+input_q "Project Version" "[$default_version]:"
+project_version=$(read_input)
+project_version=$(ensure_var "$project_version" "$default_version" "Project Name")
+
+# Show project summary and ask to continue
+log "Awesome! Project details below will be used: \n" "\tAuthor: $(c Ws)$author$(c 0G), Project: $(c Ws)$project_name$(c 0G), Version: $(c Ws)$project_version$(c 0)\n"
+
+is_that_ok
+
+# ************************************************************************************
+
+# now create new poetry project or convert existing
+section "Project Initialization" "Setting up project: 
+           - Updates configs
+           - Initializes git
+           - Creates virtual environment
+           "
+
+if $new_project; then
+    if $src_layout; then
+        log ">> Creating new poetry project (src layout) ~ " "poetry new --src ${project_name}"
+        poetry new --src "$project_name"
+    else
+        log ">> Creating new poetry project (pkg_name layout) ~ " "poetry new ${project_name}"
+        poetry new "$project_name"
+    fi
+
 fi
 
-log "" "All Good! You are running Python $python_version on $OS and Poetry is installed"
-
-section "Initializing Project" "Creates project, creates and activates virtual environment, generates required config files"
-
-echo
-# Initialize project
-log ">> Initializing project $project_name..."
-
-# make poetry project
-poetry new "./${project_name}"
-
+# now get into project dir
 work_in_project_dir() {
-    cd $1
+
+    # replacement dict
+    declare -A replacements=(
+        [_project_name_]=$project_name
+        [_author_]=$author
+        [_current_year_]=$current_year
+        [_python_version_str_]="python${python_version}"
+    )
+
+    function fetch_and_replace() {
+        txt=$(fetch_file $1)
+        replace_all "$txt" replacements >$2
+    }
+
+    if $new_project; then
+        # cd into project dir
+        cd "$project_name"
+    else
+        # we assume we are already in directory
+        # ask user first
+        log "We will init poetry in current dir: " "$(pwd)\n"
+        is_that_ok
+
+        # init poetry
+        if $src_layout; then
+            log ">> Initializing poetry project (src layout) ~ " "poetry init --src"
+            poetry init --src
+        else
+            log ">> Creating new poetry project (pkg_name layout) ~ " "poetry init"
+            poetry init
+        fi
+
+    fi
+
+    # ************************************************************************************
+
+    # Update pyproject.toml
+    echo
+    log ">> Updating pyproject.toml ~ " ">> pyproject.toml"
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" '#https://github.com/python-poetry/poetry/blob/master/pyproject.toml'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" '#https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" 'classifiers=[]'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" 'keywords=[]'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" 'maintainers=[]'
+
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" '#license="MIT"'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" '#homepage="https://docs/"'
+    replace_above_section "pyproject.toml" "tool.poetry.dependencies" '#repository="https://repo/"'
+
+    # add black
+    fetch_file "samples/pyproject-extras.toml" >>pyproject.toml
 
     # make git...
     echo
     log ">> Initializing git ... ~ " "git init"
     git init
-    git_ignore_url="https://www.toptal.com/developers/gitignore/api/$OS,Python?format=lines"
 
-    log ">> Adding .gitignore from gitignore.io- > [$OS,Python] ~ " "wget $git_ignore_url -q -O .gitignore"
+    # adding python git ignore
+    echo
+    git_ignore_url="https://www.toptal.com/developers/gitignore/api/python?format=lines"
+    log ">> Adding python .gitignore from gitignore.io ~ " "wget $git_ignore_url"
     wget $git_ignore_url -q -O .gitignore
 
-    # because poetry sometimes instsits on version 3.8
+    # because packages like flint8 sometimes instsits on version 3.8
     sed -i "s/python = \"^3.8\"/python = \"^$python_version\"/" ./pyproject.toml
 
-    # make virual environment
+    # create virtual environment
     echo
-    log ">> Creating virtual environment ~ " "python3 -m venv env"
-    python3 -m venv env
+    log ">> Creating virtual environment with venv ~ " "python -m venv env"
+    $which_python -m venv env
 
     # activate local environment
+    echo
     log ">> Activating local environment ~ " "source env/bin/activate"
     source env/bin/activate
 
-    #
-    log ">> Writing important pyproject.toml defaults ~ " ">>pyproject.toml"
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" '#https://github.com/python-poetry/poetry/blob/master/pyproject.toml'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" '#https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" 'classifiers=[]'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" 'keywords=[]'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" 'maintainers=[]'
+    # ************************************************************************************
 
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" '#license="MIT"'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" '#homepage="https://docs/"'
-    replace-above-section "pyproject.toml" "tool.poetry.dependencies" '#repository="https://repo/"'
-
-    cat <<EOT >>pyproject.toml
-
-[tool.black]
-line-length = ${format_line_length}
-exclude = '''
-/(
-    \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | docs
-)/
-'''
-
-[tool.pytest.ini_options]
-addopts = "-n auto"
-testpaths = ["tests"]
-
-EOT
-
-    log ">> Creating .flake8 file"
-    # make flake8 conf file
-    cat <<EOT >>.flake8
-[flake8]
-ignore = E203, E266, W503, F403, W293
-max-line-length = ${format_line_length}
-max-complexity = 10
-select = B,C,E,F,W,T4,B9
-per-file-ignores=
-    __init__.py: F401
-EOT
-
-    section "Dependency Installation" "Installs all required dependecies"
+    section "Installing Dependencies" "Installing all important dependecies such as flake8, pytest, mkdocs and more.."
 
     # install dependecies
     echo
@@ -408,20 +486,22 @@ EOT
     poetry add pytest flake8 --group test
 
     echo
-    log ">> Adding dev dependecies... ~ " "poetry add black isort --group dev"
+    log ">> Installing dev dependecies... ~ " "poetry add black isort --group dev"
     poetry add black isort --group dev
 
-    section "Running Tests" "Creates dummy test file, performs tests & linting via pytest, isort, black and flake8"
+    # ************************************************************************************
 
-    log ">> Making dummy test ~ " ">>./tests/test_one.py"
-    cat <<EOT >>./tests/test_one.py
+    section "Preparing for Tests" "- Configures flake8, isort & black, 
+           - Creates dummy test file
+           - Performs tests & linting via pytest, isort, black and flake8"
 
-from os import path
-import os
-def test_dummy():
-    assert 1==1
+    log ">> Creating .flake8 file ~ " "> .flake8"
+    fetch_and_replace "samples/.flake8" ".flake8"
 
-EOT
+    echo
+    log ">> Creating dummy test file ~ " "> ./tests/test_dummy.py"
+    dummy_test_text=$(fetch_file "samples/test_dummy.py")
+    echo "$dummy_test_text" >"./tests/test_dummy.py"
 
     echo
     log ">> Running pytest ~ " "poetry run pytest -v"
@@ -442,278 +522,108 @@ EOT
     echo
     log "" "Dummy test file was:"
     # show results
-    log_multi "___________________
+    echo -e "___________________\n\n$dummy_test_text\n___________________"
 
-from os import path
-import os
-def test_dummy():
-    assert 1==1
-___________________
-
-"
     echo
     log "" "Dummy test file now formatted to:"
-    out=$(cat ./tests/test_one.py)
-    log "___________________\n\n$out\n___________________"
+    formatted_dummy_test_text=$(cat ./tests/test_dummy.py)
+    echo -e "___________________\n\n$formatted_dummy_test_text\n___________________"
 
-    # echo
-    # > .pre-commit-config.yaml
+    echo
+    note "You note a difference in the original and formatted dummy test files.
+       This is because black & isort have done their magic 🪄" "up"
+
+    # ************************************************************************************
 
     section "Setting up a test automation" "Creating git hooks to automate testing and standardize code styling"
 
-    echo
     log ">> Creating pre-commit-hook file ~ " ".pre-commit-config.yaml"
-    cat <<EOT >>.pre-commit-config.yaml
-# isort
-repos:
-  - repo: https://github.com/asottile/seed-isort-config
-    rev: v2.2.0
-    hooks:
-      - id: seed-isort-config
+    fetch_and_replace "samples/.pre-commit-config.yaml" ".pre-commit-config.yaml"
 
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
-    hooks:
-      - id: isort
-
-  # black
-  - repo: https://github.com/ambv/black
-    rev: 22.8.0
-    hooks:
-      - id: black
-        args: 
-          # arguments to configure black
-          - --line-length=${format_line_length}
-          - --include='\.pyi?$'
-
-          # these folders wont be formatted by black
-          - --exclude="""\.git |
-            \.__pycache__|
-            \.hg|
-            \.mypy_cache|
-            \.tox|
-            env|
-            _build|
-            buck-out|
-            build|
-            dist|
-            docs"""
-
-        language_version: python${python_version}
-
-  # flake8
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-        args: 
-          # arguments to configure flake8
-          # making isort line length compatible with black
-          - "--max-line-length=${format_line_length}"
-          - "--max-complexity=10"
-          - "--select=B,C,E,F,W,T4,B9"
-
-          # these are errors that will be ignored by flake8
-          # check out their meaning here
-          # https://flake8.pycqa.org/en/latest/user/error-codes.html
-          - "--ignore=E203,E266,W503,F403,W293,W293"
-
-EOT
-
+    echo
     log ">> Installing pre-commit dependecies ~ " "poetry add pre-commit --group dev"
     poetry add pre-commit --group dev
 
+    echo
     log ">> Running pre-commit install ~ " "poetry run pre-commit install"
     poetry run pre-commit install
 
+    echo
     log ">> Running pre-commit autoupdate ~ " "poetry run pre-commit autoupdate"
-    poetry run pre-commit autoupdate
+    # poetry run pre-commit autoupdate
 
+    echo
     log ">> Running pre-commit run --all-files ~ " "poetry run pre-commit run --all-files"
     # because first run results in an error, we want to add || true
     poetry run pre-commit run --all-files || true
 
     # test commit
-    log ">> Running test commit ~ " "git add tests/test_one.py && git commit -m 'Commiting dummy test'"
-    git add tests/test_one.py
+    echo
+    log ">> Running test commit ~ " "git add tests/test_dummy.py && git commit -m 'Commiting dummy test'"
+
+    git add tests/test_dummy.py
     git commit -m "Commiting dummy test" || true
 
-    log ">> Removing Dummy Test ~ " "rm ./tests/test_one.py"
-    rm ./tests/test_one.py
+    echo
+    log ">> Checking git status ~ " "git status -s tests/"
+    echo
+    git status -s tests/
 
-    section "Create documentation" "Creates docs folder, installs & configures mkdocs "
+    echo
+    note "You should see:
+       $(c sG)A$(c 0) $(c sW)tests/test_dummy.py$(c 0) 
+       $(c iY)Since commit should have failed because flake8 tests fail. Error Code $(c sR)F401. $(c 0)" "up"
 
-    log ">> Installing docs modules ~ " "poetry add mkdocs mkdocstrings mkdocstrings-python mkdocs-ansible markdown-include --group doc"
+    echo
+    log ">> Removing Dummy Test ~ " "rm ./tests/test_dummy.py"
+    rm ./tests/test_dummy.py
+
+    # ************************************************************************************
+
+    section "Setting up documentation" "- Configures flake8, isort & black, 
+           - Installs dependencies needed
+           - Creates mkdocs.yml with mkdocs, themes & plugins configurations
+           - Initializes mkdocs to generate docs folder
+           - Creates placeholder README.md
+           - Creates initial index.md in ./docs folder"
+
+    log ">> Installing docs dependencies ~ " "poetry add mkdocs mkdocstrings mkdocstrings-python mkdocs-ansible markdown-include --group doc"
     poetry add mkdocs mkdocstrings mkdocstrings-python mkdocs-ansible markdown-include --group doc
 
-    log ">> Creating mkdocs.yml ~ " ">>mkdocs.yml"
+    echo
+    log ">> Creating mkdocs.yml ~ " "> mkdocs.yml"
+    fetch_and_replace "samples/mkdocs.yml" "mkdocs.yml"
 
-    cat <<EOT >>mkdocs.yml
-site_name: $project_name
-copyright: Copyright © $current_year $author.
-
-# Change to correct repo details
-# site_url: https://ansible-compat.readthedocs.io/ 
-# repo_url: https://github.com/ansible/ansible-compat
-#edit_uri: blob/main/docs/
-
-docs_dir: docs
-
-# navigation bar
-nav: 
-  - index.md
-
-# Watch
-watch:
-  - mkdocs.yml
-  - $project_name
-  - docs
-
-# Theme
-# https://squidfunk.github.io/mkdocs-material/reference/
-theme:
-    name: ansible
-    highlightjs: true
-    features:
-      - content.code.copy
-      - content.action.edit
-      - navigation.expand
-      - navigation.sections
-      - navigation.instant
-      - navigation.indexes
-      - navigation.tracking
-      - toc.integrate
-
-
-# Plugins
-plugins:
-  - autorefs
-  - material/search
-  - material/social
-  - material/tags
-  - mkdocstrings:
-      handlers:
-        python:
-          import:
-            - https://docs.python.org/3/objects.inv
-          options:
-            # heading_level: 2
-            docstring_style: sphinx
-            docstring_options:
-              ignore_init_summary: yes
-
-            show_submodules: yes
-            docstring_section_style: list
-            members_order: alphabetical
-            show_category_heading: no
-            # cannot merge init into class due to parse error...
-            # merge_init_into_class: yes
-            show_root_heading: yes
-            show_signature_annotations: yes
-            separate_signature: yes
-            show_bases: false
- 
-# markdown extensions
-# https://facelessuser.github.io/pymdown-extensions/#extensions
-markdown_extensions:
-  - markdown_include.include:
-      base_path: docs
-  - admonition
-  - def_list
-  - footnotes
-  - pymdownx.saneheaders
-  - pymdownx.smartsymbols
-  - pymdownx.highlight:
-      anchor_linenums: true
-      linenums : true
-      auto_title: false
-  - pymdownx.inlinehilite
-  - pymdownx.superfences
-  - pymdownx.magiclink:
-      repo_url_shortener: true
-      repo_url_shorthand: true
-      social_url_shorthand: true
-      social_url_shortener: true
-      user: facelessuser
-      repo: pymdown-extensions
-      normalize_issue_symbols: true
-  - pymdownx.tabbed:
-      alternate_style: true  
-  - pymdownx.emoji
-  - toc:
-      toc_depth: 4
-      permalink: true
-  - pymdownx.superfences
-
-EOT
+    # create readme
+    echo
+    log ">> Creating README.md ~ " "> README.md"
+    fetch_and_replace "samples/README.md" "README.md"
 
     # create index docs file
-    log ">> Creating docs/index.md ~ " ">>docs/index.md"
+    echo
+    log ">> Creating docs/index.md ~ " "> docs/index.md"
     mkdir docs
+    fetch_and_replace "samples/index.md" "docs/index.md"
 
-    cat <<EOT >>docs/index.md
+    echo
+    log "" "Finished setting up $poetry_project! Go through the logs $(emoji "up") to check for any warnings or errors."
 
-{!../README.md!}
+    echo 
+    note "Remember to update $(c Bs)'./poetry_project/pyproject.toml$(c 0Yi) and:$(c Wi)
+         - Add $(c  s)'keywords'$(c 0Wi)
+         - Add $(c  s)'classifiers'$(c 0Wi) see: $(c Bu)https://gist.github.com/nazrulworld/3800c84e28dc464b2b30cec8bc1287fc$(c 0Wi) 
+         - Select correct $(c  s)'license'$(c 0Wi)
+         - Edit $(c  s)'homepage'$(c 0Wi) and $(c  s)'repository'$(c 0Wi) values
+         $(c 0)"
 
-EOT
+    echo
+    note "For documentation, you can now:
+         $(c W)- Build docs with >> $(c Bs)mkdocs build$(c 0)
+         $(c Wi)- Serve docs with >> $(c Bs)mkdocs serve$(c 0)
+         $(c Wi)- Deploy docs with >> $(c Bs)mkdocs gh-deploy$(c 0)" "tick"
 
-    log ">> Updating README.md ~ " ">>README.md"
-    mkdir docs
+    echo
 
-    cat <<EOT >>README.md
-
-# ${project_name}
-
-Summary
-
-## How To Use
-
-Use \`${project_name}\` as shown below
-
-\`\`\`python
-# Code here...
-import os
-print(os.getcwd())
-\`\`\`
-
-## MkDocs Config
-
-\`\`\`yaml
-{!../mkdocs.yml!}
-\`\`\`
-
-## Symbols & Emoji
-| Emoji | Symbols |
-|---|---|
-|:smile: :heart: :thumbsup: | (tm)  (c)  (r)  c/o <br/> -->  <--  <-->  =/=  +/- <br/> 1/2 1/4 1st  2nd  3rd|
-
-EOT
-
-    # Create/Update files
-    # update pyproject.toml
-    log ">> Editing pyproject.toml ~ " " >>pyproject.toml"
-    cat <<EOT >>pyproject.toml
-    
-[tool.isort]
-profile = "black"
-
-# optional groups
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.doc]
-optional = true
-
-
-EOT
-
-    log "[!]" "You can build docs with >> " "mkdocs build"
-    log "[!]" "Alternatively serve docs with >> " "mkdocs serve"
-    log "[!]" "Deploy docs with >> " "mkdocs gh-deploy"
 }
 
-# we need a function in order to cd into dict
-work_in_project_dir $project_name
+work_in_project_dir
