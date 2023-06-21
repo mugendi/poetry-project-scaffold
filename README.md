@@ -19,6 +19,7 @@ bash record-svg.sh
  -->
 
 ![](assets/recording.gif)
+[View on Asciinema](https://asciinema.org/a/Q0xFHD4qmmCxuPUFqyUYRcLis)
 
 Poetry is an amazing tool for dependency management and packaging in Python. When used together with other amazing libraries such as [flake8](https://flake8.pycqa.org/), [mkdocs](https://mkdocs-dupe-test.readthedocs.io/) and many others, you can create [Pro Python Projects](https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2) everty single time. 
 
