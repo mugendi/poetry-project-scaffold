@@ -618,6 +618,12 @@ work_in_project_dir() {
     mkdir docs/includes
     fetch_and_replace "samples/abbreviations.md" "docs/includes/abbreviations.md"
 
+    # create docs/styles/extra.css
+    echo
+    log ">> Creating extra.css ~ " "> docs/styles/extra.css"
+    mkdir docs/styles
+    fetch_and_replace "samples/extra.css" "docs/styles/extra.css"
+
     echo
     log "" "Finished setting up $poetry_project! Go through the logs $(emoji "up") to check for any warnings or errors."
 
