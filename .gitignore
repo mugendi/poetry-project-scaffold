@@ -1,4 +1,6 @@
 */
 *.cast
+nodemon.json
 !samples/
 !docs/
+!assets/
