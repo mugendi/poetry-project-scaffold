@@ -13,18 +13,19 @@
 [![github-stars](https://img.shields.io/github/stars/mugendi/poetry-project-scaffold?style=flat-square&logo=github)](https://github.com/mugendi/poetry-project-scaffold)
 [![github-forks](https://img.shields.io/github/forks/mugendi/poetry-project-scaffold?label=Fork&style=flat-square&logo=github)](https://github.com/mugendi/poetry-project-scaffold)
 
-![](assets/screenshot.png)
-Poetry is an amazing tool for dependency management and packaging in Python. When used together with other amazing libraries such as [flake8](https://flake8.pycqa.org/), [mkdocs](https://mkdocs-dupe-test.readthedocs.io/) and many others, you can create [Pro Python Projects](https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2) everty single time. 
-
-
-This is a bash script that performs simple scaffolding for you and configures all the tools you need based on [This Brilliant Article](https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2). The only main deviation from the article is that we use `mkdocs` and not `sphinx` coz i find the tooling simpler and better.
-
 <!-- 
 To generate new recording, run 
 bash record-svg.sh
  -->
 
 ![](assets/recording.gif)
+
+Poetry is an amazing tool for dependency management and packaging in Python. When used together with other amazing libraries such as [flake8](https://flake8.pycqa.org/), [mkdocs](https://mkdocs-dupe-test.readthedocs.io/) and many others, you can create [Pro Python Projects](https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2) everty single time. 
+
+
+This is a bash script that performs simple scaffolding for you and configures all the tools you need based on [This Brilliant Article](https://medium.com/mlearning-ai/how-to-start-any-professional-python-package-project-9f66538ebc2). The only main deviation from the article is that we use `mkdocs` and not `sphinx` coz i find the tooling simpler and better.
+
+
 
 ## Installation
 
