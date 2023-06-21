@@ -173,6 +173,8 @@ function ensure_var() {
     echo "${var}"
 }
 
+# check if 'which cmd' runs without error
+# this function is used to check if certain commands/tools are installed
 function ensure_which() {
     local cmd="$1"
     local test=$(which $cmd)
@@ -185,6 +187,7 @@ function ensure_which() {
     echo $test
 }
 
+# replace all spaces with underscores
 function snake_case() {
     local str="$1"
     echo "${str// /_}"
@@ -194,6 +197,8 @@ function input_q() {
     log "$(c s)$1$(c 0) $2 $3$4"
 }
 
+# ask user the yes/no question "Is that okay?"
+# read their input and return if yes or exit if no
 function is_that_ok() {
     input_q "Is that okay?" "(y/n)" "[y]"
 
@@ -378,6 +383,7 @@ log "Awesome! Project details below will be used: \n" "\tAuthor: $(c Ws)$author$
 
 is_that_ok
 
+
 # ************************************************************************************
 
 # now create new poetry project or convert existing
@@ -475,6 +481,7 @@ work_in_project_dir() {
     echo
     log ">> Activating local environment ~ " "source env/bin/activate"
     source env/bin/activate
+
 
     # ************************************************************************************
 
