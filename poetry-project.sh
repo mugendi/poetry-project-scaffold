@@ -612,6 +612,12 @@ work_in_project_dir() {
     mkdir docs
     fetch_and_replace "samples/index.md" "docs/index.md"
 
+    # create abbreviations.md file within docs/includes
+    echo
+    log ">> Creating abbreviations.md ~ " "> docs/includes/abbreviations.md"
+    mkdir docs/includes
+    fetch_and_replace "samples/abbreviations.md" "docs/includes/abbreviations.md"
+
     echo
     log "" "Finished setting up $poetry_project! Go through the logs $(emoji "up") to check for any warnings or errors."
 
